@@ -1,13 +1,13 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:26:26
- * @LastEditTime: 2020-11-29 20:25:50
+ * @LastEditTime: 2020-11-29 23:34:44
 -->
 # JSON 基础
 * [1. JSON 数据类型](#1-json-数据类型)  
 * [2. JSON 语法子集](#2-json-语法子集)
-  * [2.1 null & true & false 语法子集](#2.1-null-true-false-语法子集)
-  * [2.2 Numbers 语法子集](#2.2-Numbers-语法子集)
+  * [2.1 null & true & false 语法子集](#21-null-true-false-语法子集)
+  * [2.2 Numbers 语法子集](#22-numbers-语法子集)
 ## 1. JSON 数据类型
 * null: 表示为 null
 * boolean: 表示为 true 或 false
