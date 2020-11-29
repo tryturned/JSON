@@ -1,11 +1,13 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-29 17:27:58
+ * @LastEditTime: 2020-11-29 21:40:43
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <errno.h>
 
 #include "json.h"
 
@@ -14,7 +16,8 @@
       c->json++;\
     }\
     while (0)
-
+#define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
+#define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
 static void json_parse_whitespace(json_context* c) {
   const char *p = c->json;
@@ -23,30 +26,45 @@ static void json_parse_whitespace(json_context* c) {
   c->json = p;
 }
 
-// static json_parse_type json_parse_null(json_context* c, json_value* v) {
-//   EXPECT(c, 'n');
-//   if (c->json[0] != 'u' || c->json[1] != 'l' || c->json[2] != 'l')
-//     return JSON_PARSE_INVALID_VALUE;
-//   c->json += 3;
-//   v->type = JSON_NULL;
-//   return JSON_PARSE_OK;
-// }
-
 static json_parse_type json_parse_literal(json_context* c, json_value* v, const char* patt, json_type t) {
-  if (t == JSON_NULL || t == JSON_TRUE) {
-    EXPECT(c, patt[0]);
-    if (c->json[0] != patt[1] || c->json[1] != patt[2] || c->json[2] != patt[3])
-    return JSON_PARSE_INVALID_VALUE;
-    c->json += 3;
-    if (t == JSON_NULL) v->type = JSON_NULL;
-    if (t == JSON_TRUE) v->type = JSON_TRUE;
-  } else if (t == JSON_FALSE) {
-    EXPECT(c, patt[0]);
-    if (c->json[0] != patt[1] || c->json[1] != patt[2] || c->json[2] != patt[3] || c->json[3] != patt[4])
+  size_t index;
+  EXPECT(c, patt[0]);
+  for (index = 0; patt[index + 1]; index++) {
+    if (c->json[index] != patt[index + 1])
       return JSON_PARSE_INVALID_VALUE;
-    c->json += 4;
-    v->type = JSON_FALSE;
   }
+  c->json += index;
+  v->type = t;
+  return JSON_PARSE_OK;
+}
+
+static json_parse_type json_parse_number(json_context* c, json_value* v) {
+  // TODO validate number
+  const char* p = c->json;
+  if (*p == '-') p++;
+  if (*p == '0') p++;
+  else {
+      if (!ISDIGIT1TO9(*p)) return JSON_PARSE_INVALID_VALUE;
+      for (p++; ISDIGIT(*p); p++);
+  }
+  if (*p == '.') {
+      p++;
+      if (!ISDIGIT(*p)) return JSON_PARSE_INVALID_VALUE;
+      for (p++; ISDIGIT(*p); p++);
+  }
+  if (*p == 'e' || *p == 'E') {
+      p++;
+      if (*p == '+' || *p == '-') p++;
+      if (!ISDIGIT(*p)) return JSON_PARSE_INVALID_VALUE;
+      for (p++; ISDIGIT(*p); p++);
+  }
+  // translate
+  errno = 0;
+  v->n = strtod(c->json, NULL);
+  if (errno == ERANGE && (v->n == HUGE_VAL || v->n == -HUGE_VAL))
+    return JSON_PARSE_NUMBER_TOO_BIG;
+  c->json = p;
+  v->type = JSON_NUMBER;
   return JSON_PARSE_OK;
 }
 
@@ -55,8 +73,8 @@ static json_parse_type json_parse_value(json_context* c, json_value* v) {
     case 'n': return json_parse_literal(c, v, "null", JSON_NULL);
     case 't': return json_parse_literal(c, v, "true", JSON_TRUE);
     case 'f': return json_parse_literal(c, v, "false", JSON_FALSE);
+    default:  return json_parse_number(c, v);
     case '\0': return JSON_PARSE_EXPECT_VALUE;
-    default: return JSON_PARSE_INVALID_VALUE;
   }
 }
 
@@ -72,7 +90,6 @@ json_parse_type json_parse(json_value* v, const char* json) {
     if (*c.json != '\0') 
       return JSON_PARSE_ROOT_NOT_SINGULAR;
   }
-
   return res;
 }
 
@@ -81,3 +98,7 @@ json_type json_get_type(const json_value* v) {
   return v->type;
 }
 
+double json_get_number(const json_value* v) {
+  assert(v != NULL && v->type == JSON_NUMBER);
+  return v->n;
+}
