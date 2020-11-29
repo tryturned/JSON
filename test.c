@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-11-29 21:09:05
+ * @LastEditTime: 2020-11-29 23:16:10
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,11 +110,19 @@ static void test_parse_invalid_value() {
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "inf");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "NAN");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "nan");
-  TEST_ERROR(JSON_PARSE_INVALID_VALUE, "0123");
 }
 
 static void test_parse_root_not_singular() {
   TEST_ERROR(JSON_PARSE_ROOT_NOT_SINGULAR, "null x");
+
+  TEST_ERROR(JSON_PARSE_ROOT_NOT_SINGULAR, "0123");
+  TEST_ERROR(JSON_PARSE_ROOT_NOT_SINGULAR, "0x123");
+  TEST_ERROR(JSON_PARSE_ROOT_NOT_SINGULAR, "0x0");
+}
+
+static void test_parse_number_too_big() {
+  TEST_ERROR(JSON_PARSE_NUMBER_TOO_BIG, "1e309");
+  TEST_ERROR(JSON_PARSE_NUMBER_TOO_BIG, "-1e309");
 }
 
 static void test_parse() {
@@ -125,6 +133,7 @@ static void test_parse() {
   test_parse_true();
   test_parse_false();
   test_parse_number();
+  test_parse_number_too_big();
 }
 
 int main() {

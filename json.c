@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-29 21:40:43
+ * @LastEditTime: 2020-11-29 23:31:50
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,8 +42,11 @@ static json_parse_type json_parse_number(json_context* c, json_value* v) {
   // TODO validate number
   const char* p = c->json;
   if (*p == '-') p++;
-  if (*p == '0') p++;
-  else {
+  if (*p == '0') {
+    p++;
+    if (*p && *p != '.') 
+      return JSON_PARSE_ROOT_NOT_SINGULAR;
+  } else {
       if (!ISDIGIT1TO9(*p)) return JSON_PARSE_INVALID_VALUE;
       for (p++; ISDIGIT(*p); p++);
   }
