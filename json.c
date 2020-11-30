@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-30 15:34:59
+ * @LastEditTime: 2020-11-30 20:13:54
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,12 +10,6 @@
 #include <errno.h>
 
 #include "json.h"
-
-#define EXPECT(c, ch) do {\
-      assert(*c->json == (ch));\
-      c->json++;\
-    }\
-    while (0)
 
 static void json_parse_whitespace(json_context* c) {
   const char *p = c->json;
@@ -69,12 +63,57 @@ static json_parse_type json_parse_number(json_context* c, json_value* v) {
   return JSON_PARSE_OK;
 }
 
+static void* json_context_push(json_context* c, size_t size) {
+  assert(size > 0);
+  void* ret;
+  if (c->top + size >= c->size) {
+    if (c->size == 0)
+      c->size = JSON_PARSE_STACK_INIT_SIZE;
+    while (c->top + size >= c->size)
+      c->size += c->size >> 1;
+    c->stack = (char*)realloc(c->stack, c->size);
+  }
+  ret = c->stack + c->top;
+  c->top += size;
+  return ret;
+}
+
+static void* json_context_pop(json_context* c, size_t size) {
+  assert(c->top >= size);
+  return c->stack + (c->top -= size);
+}
+
+#define PUTC(c, ch) do { *(char*)json_context_push(c, sizeof(char)) = (ch); } while(0)
+
+static json_parse_type json_parse_string(json_context* c, json_value* v) {
+  EXPECT(c, '\"');
+  size_t head = c->top, len;
+  const char* p;
+  p = c->json;
+  while (True) {
+      char ch = *p++;
+      switch (ch) {
+          case '\"':
+              len = c->top - head;
+              json_set_string(v, (const char*)json_context_pop(c, len), len);
+              c->json = p;
+              return JSON_PARSE_OK;
+          case '\0':
+              c->top = head;
+              return LEPT_PARSE_MISS_QUOTATION_MARK;
+          default:
+              PUTC(c, ch);
+      }
+  }  
+}
+
 static json_parse_type json_parse_value(json_context* c, json_value* v) {
   switch (*c->json) {
-    case 'n': return json_parse_literal(c, v, "null", JSON_NULL);
-    case 't': return json_parse_literal(c, v, "true", JSON_TRUE);
-    case 'f': return json_parse_literal(c, v, "false", JSON_FALSE);
-    default:  return json_parse_number(c, v);
+    case 'n':  return json_parse_literal(c, v, "null", JSON_NULL);
+    case 't':  return json_parse_literal(c, v, "true", JSON_TRUE);
+    case 'f':  return json_parse_literal(c, v, "false", JSON_FALSE);
+    case '"':  return json_parse_string(c, v);
+    default:   return json_parse_number(c, v);
     case '\0': return JSON_PARSE_EXPECT_VALUE;
   }
 }
@@ -84,6 +123,8 @@ json_parse_type json_parse(json_value* v, const char* json) {
   json_context c;
   json_parse_type res;
   c.json = json;
+  c.stack = NULL;
+  c.size = c.top = 0;
   json_init(v);
   json_parse_whitespace(&c);
   if ((res = json_parse_value(&c, v)) == JSON_PARSE_OK) {
@@ -93,6 +134,8 @@ json_parse_type json_parse(json_value* v, const char* json) {
       return JSON_PARSE_ROOT_NOT_SINGULAR;
     }
   }
+  assert(c.top == 0);
+  free(c.stack);
   return res;
 }
 

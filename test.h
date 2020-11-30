@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-30 14:32:29
- * @LastEditTime: 2020-11-30 15:11:11
+ * @LastEditTime: 2020-11-30 20:03:28
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,4 +46,14 @@
       EXPECT_EQ_INT(JSON_NULL, json_get_type(&v));\
       json_free(&v);\
     } while (0)
+
+#define TEST_STRING(expect, json)\
+    do {\
+        json_value v;\
+        json_init(&v);\
+        EXPECT_EQ_INT(JSON_PARSE_OK, json_parse(&v, json));\
+        EXPECT_EQ_INT(JSON_STRING, json_get_type(&v));\
+        EXPECT_EQ_STRING(expect, json_get_string(&v), json_get_string_length(&v));\
+        json_free(&v);\
+    } while(0)
     

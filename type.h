@@ -1,11 +1,13 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-11-30 13:13:54
+ * @LastEditTime: 2020-11-30 19:51:30
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
 
+#define False 0
+#define True 1
 // JSON 数据类型
 typedef enum {
   JSON_NULL,
@@ -40,11 +42,16 @@ typedef enum {
   JSON_PARSE_INVALID_VALUE,
   // 若一个值之后，在空白之后还有其他字符
   JSON_PARSE_ROOT_NOT_SINGULAR,
-  JSON_PARSE_NUMBER_TOO_BIG
+  // 溢出
+  JSON_PARSE_NUMBER_TOO_BIG,
+  // string 类型丢失了 "
+  LEPT_PARSE_MISS_QUOTATION_MARK
 } json_parse_type;
 
 typedef struct {
   const char* json;
+  char* stack;
+  size_t size, top;
 } json_context;
 
 #endif

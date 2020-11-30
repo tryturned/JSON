@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-11-30 15:36:23
+ * @LastEditTime: 2020-11-30 20:16:14
  */
 # include "test.h"
 
@@ -142,6 +142,15 @@ static void test_access_number() {
   json_free(&v);
 }
 
+static void test_parse_string() {
+    TEST_STRING("", "\"\"");
+    TEST_STRING("Hello", "\"Hello\"");
+#if 0
+    TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
+    TEST_STRING("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+#endif
+}
+
 static void test_parse() {
   test_parse_expect_value();
   test_parse_invalid_value();
@@ -151,6 +160,7 @@ static void test_parse() {
   test_parse_false();
   test_parse_number();
   test_parse_number_too_big();
+  test_parse_string();
 
   // naive unit test
   test_access_null();
