@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-29 23:31:50
+ * @LastEditTime: 2020-11-30 13:39:40
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,8 +16,6 @@
       c->json++;\
     }\
     while (0)
-#define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
-#define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
 static void json_parse_whitespace(json_context* c) {
   const char *p = c->json;
@@ -105,3 +103,21 @@ double json_get_number(const json_value* v) {
   assert(v != NULL && v->type == JSON_NUMBER);
   return v->n;
 }
+
+void json_set_number(json_value* v, double n) {
+  assert(v != NULL && v->type == JSON_NUMBER);
+  v->n = n;
+}
+
+int json_get_boolean(const json_value* v) {
+  assert(v != NULL && (v->type == JSON_TRUE || v->type == JSON_FALSE));
+  return v->type;
+}
+
+void json_set_boolean(json_value* v, int b) {
+  assert(v != NULL && (b == JSON_TRUE || b == JSON_FALSE));
+  v->type = b;
+}
+
+void json_set_string(json_value* v, const char* s, size_t len);
+void json_free(json_value* v);

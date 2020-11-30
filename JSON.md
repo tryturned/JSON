@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:26:26
- * @LastEditTime: 2020-11-30 12:02:15
+ * @LastEditTime: 2020-11-30 13:20:12
 -->
 # JSON 基础
 * [1. JSON 数据类型](#1-json-数据类型)  
@@ -9,6 +9,8 @@
   * [2.1 null & true & false 语法子集](#21-null-true-false-语法子集)
   * [2.2 Numbers 语法子集](#22-numbers-语法子集)
   * [2.3 Strings 语法子集](#23-strings-语法子集)
+* [3. SKILLS 整合](#3-SKILLS-整合)
+
 ## 1. JSON 数据类型
 * null: 表示为 null
 * boolean: 表示为 true 或 false
@@ -86,3 +88,8 @@ true  = "true"
 
 在转义字符列表中需要特别注意的是 `\uXXXX` ，这种情况表明在 `JSON Strings` 中若一个字符属于 `BMP` (<a href="https://encyclopedia2.thefreedictionary.com/Basic+Multilingual+Plane">Basic Multilingual Plane</a>) , 那么该字符可以使用 `\uXXXX` 这种六个字符来表示，其中 `X` 表示 `16` 进制数。例如，一个字符串包含只有一个 `\` 字符可以表示为 `"\u005C"`。
 
+
+## 3. SKILLS 整合  
+[cppreference.com:中](https://zh.cppreference.com/w/%E9%A6%96%E9%A1%B5)  
+
+[Cpp中匿名 Union 和匿名 Struct 用法](https://hajimeru.github.io/2019/04/03/anonymous-Union-and-struct-of-cpp/)
