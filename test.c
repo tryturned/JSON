@@ -1,8 +1,12 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-11-30 20:16:14
+ * @LastEditTime: 2020-11-30 20:54:41
  */
+#ifdef _WINDOWS
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 # include "test.h"
 
 static int main_ret = 0;
@@ -170,6 +174,9 @@ static void test_parse() {
 }
 
 int main() {
+  #ifdef _WINDOWS
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+  #endif
   test_parse();
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
   return main_ret;

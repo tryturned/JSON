@@ -1,8 +1,12 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-30 20:13:54
+ * @LastEditTime: 2020-11-30 20:55:31
  */
+#ifdef _WINDOWS
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -161,7 +165,7 @@ int json_get_boolean(const json_value* v) {
 }
 
 void json_set_boolean(json_value* v, int b) {
-  json_free(v);
+  //json_free(v);
   v->type = b ? JSON_TRUE : JSON_FALSE;
 }
 
