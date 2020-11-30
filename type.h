@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-11-30 19:51:30
+ * @LastEditTime: 2020-11-30 21:14:54
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
@@ -45,7 +45,11 @@ typedef enum {
   // 溢出
   JSON_PARSE_NUMBER_TOO_BIG,
   // string 类型丢失了 "
-  LEPT_PARSE_MISS_QUOTATION_MARK
+  LEPT_PARSE_MISS_QUOTATION_MARK,
+  // 转义字符 \ 后出现了无效字符
+  JSON_PARSE_INVALID_STRING_ESCAPE,
+  // 出现了不合法的字符，即 ascii code 位于 [0x00, 0x1F] 的字符
+  JSON_PARSE_INVALID_STRING_CHAR
 } json_parse_type;
 
 typedef struct {

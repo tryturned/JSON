@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-11-30 20:54:41
+ * @LastEditTime: 2020-11-30 21:32:57
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -149,10 +149,20 @@ static void test_access_number() {
 static void test_parse_string() {
     TEST_STRING("", "\"\"");
     TEST_STRING("Hello", "\"Hello\"");
-#if 0
     TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
     TEST_STRING("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
-#endif
+}
+
+static void test_parse_invalid_string_escape() {
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\g\"");
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\'\"");
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\0\"");
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\x12\"");
+}
+
+static void test_parse_invalid_string_char() {
+    TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
+    TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x1F\"");
 }
 
 static void test_parse() {
@@ -165,6 +175,8 @@ static void test_parse() {
   test_parse_number();
   test_parse_number_too_big();
   test_parse_string();
+  test_parse_invalid_string_escape();
+
 
   // naive unit test
   test_access_null();

@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-30 20:55:31
+ * @LastEditTime: 2020-11-30 21:29:32
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -97,16 +97,36 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
   while (True) {
       char ch = *p++;
       switch (ch) {
-          case '\"':
-              len = c->top - head;
-              json_set_string(v, (const char*)json_context_pop(c, len), len);
-              c->json = p;
-              return JSON_PARSE_OK;
-          case '\0':
+        case '\"':
+          len = c->top - head;
+          json_set_string(v, (const char*)json_context_pop(c, len), len);
+          c->json = p;
+          return JSON_PARSE_OK;
+        case '\0':
+          c->top = head;
+          return LEPT_PARSE_MISS_QUOTATION_MARK;
+        case '\\':
+          switch (*p++) {
+            case '\"': PUTC(c, '\"'); break;
+            case '\\': PUTC(c, '\\'); break;
+            case '/':  PUTC(c, '/' ); break;
+            case 'b':  PUTC(c, '\b'); break;
+            case 'f':  PUTC(c, '\f'); break;
+            case 'n':  PUTC(c, '\n'); break;
+            case 'r':  PUTC(c, '\r'); break;
+            case 't':  PUTC(c, '\t'); break;
+          
+            default:
               c->top = head;
-              return LEPT_PARSE_MISS_QUOTATION_MARK;
-          default:
-              PUTC(c, ch);
+              return JSON_PARSE_INVALID_STRING_ESCAPE;
+          }
+          break;
+        default:
+          if ((unsigned char)ch < 0x20) {
+            c->top = head;
+            return JSON_PARSE_INVALID_STRING_CHAR;
+          }
+          PUTC(c, ch);
       }
   }  
 }
@@ -165,7 +185,7 @@ int json_get_boolean(const json_value* v) {
 }
 
 void json_set_boolean(json_value* v, int b) {
-  //json_free(v);
+  json_free(v);
   v->type = b ? JSON_TRUE : JSON_FALSE;
 }
 
