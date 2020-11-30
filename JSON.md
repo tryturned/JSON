@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:26:26
- * @LastEditTime: 2020-11-30 18:38:04
+ * @LastEditTime: 2020-11-30 18:56:31
 -->
 # JSON 基础
 * [1. JSON 数据类型](#1-json-数据类型)  
@@ -33,7 +33,7 @@ true  = "true"
 下面指定了 `null` `false` `true`的字面值.
 ### 2.2 Numbers 语法子集
 <div align="center">
-    <img src="image\numeric.png">
+    <img src="image\numeric.png" alt="The JSON Data Interchange Syntax" width="550" height="400">
 </div>  
 
 图片来源: [The JSON Data Interchange Syntax](https://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf)    
@@ -64,7 +64,7 @@ true  = "true"
 ```
 ### 2.3 Strings 语法子集  
 <div align="center">
-    <img src="image\strings.png">
+    <img src="image\strings.png" width="550" height="400">
 </div>    
 
 下面是 `json string` 具体语法的详细介绍：
