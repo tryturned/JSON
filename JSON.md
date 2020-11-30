@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:26:26
- * @LastEditTime: 2020-11-30 13:20:12
+ * @LastEditTime: 2020-11-30 18:38:04
 -->
 # JSON 基础
 * [1. JSON 数据类型](#1-json-数据类型)  
@@ -62,7 +62,12 @@ true  = "true"
       zero = %x30                ; 0
 
 ```
-### 2.3 Strings 语法子集
+### 2.3 Strings 语法子集  
+<div align="center">
+    <img src="image\strings.png">
+</div>    
+
+下面是 `json string` 具体语法的详细介绍：
 ```matlab
       string = quotation-mark *char quotation-mark
 
