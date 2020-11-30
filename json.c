@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-30 13:39:40
+ * @LastEditTime: 2020-11-30 15:34:59
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,14 +82,16 @@ static json_parse_type json_parse_value(json_context* c, json_value* v) {
 json_parse_type json_parse(json_value* v, const char* json) {
   assert(v != NULL);
   json_context c;
-  c.json = json;
-  v->type = JSON_NULL;
-  json_parse_whitespace(&c);
   json_parse_type res;
+  c.json = json;
+  json_init(v);
+  json_parse_whitespace(&c);
   if ((res = json_parse_value(&c, v)) == JSON_PARSE_OK) {
     json_parse_whitespace(&c);
-    if (*c.json != '\0') 
+    if (*c.json != '\0') {
+      v->type = JSON_NULL; 
       return JSON_PARSE_ROOT_NOT_SINGULAR;
+    }
   }
   return res;
 }
@@ -105,19 +107,44 @@ double json_get_number(const json_value* v) {
 }
 
 void json_set_number(json_value* v, double n) {
-  assert(v != NULL && v->type == JSON_NUMBER);
+  json_free(v);
   v->n = n;
+  v->type = JSON_NUMBER;
 }
 
 int json_get_boolean(const json_value* v) {
   assert(v != NULL && (v->type == JSON_TRUE || v->type == JSON_FALSE));
-  return v->type;
+  return v->type == JSON_TRUE;
 }
 
 void json_set_boolean(json_value* v, int b) {
-  assert(v != NULL && (b == JSON_TRUE || b == JSON_FALSE));
-  v->type = b;
+  json_free(v);
+  v->type = b ? JSON_TRUE : JSON_FALSE;
 }
 
-void json_set_string(json_value* v, const char* s, size_t len);
-void json_free(json_value* v);
+void json_free(json_value* v) {
+  assert(v != NULL);
+  if (v->type == JSON_STRING)
+    free(v->s);
+  v->type = JSON_NULL;
+}
+
+void json_set_string(json_value* v, const char* s, size_t len) {
+  assert(v != NULL && (s != NULL || len == 0));
+  json_free(v);
+  v->s = (char*)malloc(len + 1);
+  memmove(v->s, s, len);
+  v->s[len] = '\0';
+  v->len = len;
+  v->type = JSON_STRING;
+}
+
+const char* json_get_string(const json_value* v) {
+  assert(v != NULL && v->type == JSON_STRING);
+  return v->s;
+}
+
+size_t json_get_string_length(const json_value* v) {
+  assert(v != NULL && v->type == JSON_STRING);
+  return v->len;
+}
