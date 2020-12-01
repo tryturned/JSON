@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-11-30 21:32:57
+ * @LastEditTime: 2020-12-01 11:42:46
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -176,6 +176,7 @@ static void test_parse() {
   test_parse_number_too_big();
   test_parse_string();
   test_parse_invalid_string_escape();
+  test_parse_invalid_string_char();
 
 
   // naive unit test
