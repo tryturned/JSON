@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:26:26
- * @LastEditTime: 2020-12-02 15:47:00
+ * @LastEditTime: 2020-12-02 17:24:46
 -->
 # JSON 基础
 * [1. JSON 数据类型](#1-json-数据类型)  
@@ -10,6 +10,7 @@
   * [2.2 Numbers 语法子集](#22-numbers-语法子集)
   * [2.3 Strings 语法子集](#23-strings-语法子集)
   * [2.4 Unicode --> UTF-8 编码](#24-UTF-8-编码)
+  * [2.5 Arrays 语法子集](#25-Arrays-语法子集)
 * [3. SKILLS 整合](#3-SKILLS-整合)
 
 ## 1. JSON 数据类型
@@ -133,6 +134,21 @@ codepoint = 0x10000 + (H − 0xD800) × 0x400 + (L − 0xDC00)
           = 0x1D11E
 ```
 通过这种手段就可以得到所有 `Unicode` 编码的字符的码点了， 这样就可以基于上面的描述方式将其编码为 `utf-8` 格式了。
+
+### 2.5 Arrays 语法子集
+```bash
+array = begin-array [ value *( value-separator value ) ] end-array
+```
+<div align="center">
+    <img src="image\array.png" width="550" height="200">
+</div>    
+更细节的来说，其具体语法如下所示：   
+
+```bash
+array = %x5B ws [ value *( ws %x2C ws value ) ] ws %x5D
+``` 
+当中，`%x5B` 是左中括号 `[`，`%x2C` 是逗号 ,`%x5D` 是右中括号 `]` ，`ws` 是空白字符。一个数组可以包含零至多个值，以逗号分隔，例如 `[]`、`[1,2,true]`、`[[1,2],[3,4],"abc"]` 都是合法的数组。但注意 `JSON` 不接受末端额外的逗号，例如 `[1,2,]` 是不合法的。
+
 
 
 ## 3. SKILLS 整合  
