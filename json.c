@@ -1,18 +1,12 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-02 12:30:27
+ * @LastEditTime: 2020-12-02 15:47:22
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
-
 #include "json.h"
 
 static void json_parse_whitespace(json_context* c) {
@@ -89,6 +83,22 @@ static void* json_context_pop(json_context* c, size_t size) {
 
 #define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
+const char* json_parse_hex4(const char* p, unsigned* u) {
+  unsigned ret = 0;
+  for (int _ = 0; _ < 4 && p != '\0'; _++, p++) {
+    ret <<= 4;
+    if (ISDIGIT(*p)) {
+      ret |= (*p - '0');
+    } else if (ISALPHAATOF(*p)) { /* A~F or a~f */
+      ret |= (tolower(*p) - 'a') + 10;
+    } else {
+      return NULL;
+    }
+  }
+  *u = ret;
+  return p;
+}
+
 static json_parse_type json_parse_string(json_context* c, json_value* v) {
   EXPECT(c, '\"');
   size_t head = c->top, len;
@@ -118,6 +128,7 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
               unsigned u;
               if (!(p = json_parse_hex4(p, &u)))
                 STRING_ERROR(JSON_PARSE_INVALID_UNICODE_HEX);
+              // if (u >= )
               json_encode_utf8(c, u);
               break;
           

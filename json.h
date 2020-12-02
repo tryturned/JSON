@@ -1,17 +1,24 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:42:22
- * @LastEditTime: 2020-12-02 12:26:47
+ * @LastEditTime: 2020-12-02 15:03:53
  */
 #ifndef JSON_JSON_H__
 #define JSON_JSON_H__
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <errno.h>
 #include <assert.h>
+#include <ctype.h>
 #include "type.h"
 
 #ifndef JSON_PARSE_STACK_INIT_SIZE
 #define JSON_PARSE_STACK_INIT_SIZE 256
 #endif
 
+#define ISALPHAATOF(ch)  tolower((ch)) >= 'a' && tolower((ch)) <= 'f'
 #define ISDIGIT(ch) ((ch) >= '0' && (ch) <= '9')
 #define ISDIGIT1TO9(ch) ((ch) >= '1' && (ch) <= '9')
 
