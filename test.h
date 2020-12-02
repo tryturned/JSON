@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-30 14:32:29
- * @LastEditTime: 2020-11-30 20:03:28
+ * @LastEditTime: 2020-12-02 23:08:34
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,3 +57,4 @@
         json_free(&v);\
     } while(0)
     
+#define EXPECT_EQ_SIZE_T(expect, actual) EXPECT_EQ_BASE((expect) == (actual), (size_t)expect, (size_t)actual, "%zu")

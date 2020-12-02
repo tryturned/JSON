@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-02 16:56:03
+ * @LastEditTime: 2020-12-02 23:22:04
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -259,4 +259,21 @@ const char* json_get_string(const json_value* v) {
 size_t json_get_string_length(const json_value* v) {
   assert(v != NULL && v->type == JSON_STRING);
   return v->len;
+}
+
+size_t json_get_array_size(const json_value* v) {
+  assert(v != NULL && v->type == JSON_ARRAY);
+  return v->size;
+}
+
+json_value* json_get_array_element(const json_value* v, size_t index) {
+  assert(v != NULL && v->type == JSON_ARRAY);
+  assert(index < v->size);
+  return &v->e[index];
+}
+
+void json_set_array(json_value* v, json_value* array) {
+  json_free(v);
+  v->e = array;
+  v->type = JSON_ARRAY;
 }

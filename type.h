@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-12-02 16:05:17
+ * @LastEditTime: 2020-12-02 23:00:39
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
@@ -19,8 +19,9 @@ typedef enum {
   JSON_OBJECT
 } json_type;
 
+typedef struct json_value json_value;
 // JSON 树的节点
-typedef struct {
+struct json_value {
   union {
     // 仅当 json_type==JSON_NUMBER 时 n 有效
     double n;
@@ -29,9 +30,14 @@ typedef struct {
       char* s;
       size_t len;
     };
+    // 仅当 json_type==JSON_ARRAY 时 s,len 有效
+    struct {
+      json_value* e;
+      size_t size;
+    };
   };
   json_type type;
-} json_value;
+};
 
 // json_parse 状态返回类型
 typedef enum {

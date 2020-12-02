@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-12-02 16:56:18
+ * @LastEditTime: 2020-12-02 23:27:20
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -190,6 +190,25 @@ static void test_parse_invalid_unicode_surrogate() {
   TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD811\\u0032\"");
 }
 
+static void test_parse_array() {
+    json_value v;
+    json_init(&v);
+    EXPECT_EQ_INT(JSON_PARSE_OK, json_parse(&v, "[ ]"));
+    EXPECT_EQ_INT(JSON_ARRAY, json_get_type(&v));
+    EXPECT_EQ_SIZE_T(0, json_get_array_size(&v));
+    json_free(&v);
+}
+static void test_access_array() {
+  json_value v, v2;
+  json_init(&v);
+  json_init(&v2);
+  json_set_string(&v, "a", 1);
+  json_set_array(&v2, &v);
+  EXPECT_EQ_INT(JSON_ARRAY, json_get_type(&v2));
+  json_free(&v);
+  json_free(&v2);
+}
+
 // 𝄞
 static void test_parse() {
   test_parse_expect_value();
@@ -206,6 +225,7 @@ static void test_parse() {
   test_parse_missing_quotation_mark();
   test_parse_invalid_unicode_hex();
   test_parse_invalid_unicode_surrogate();
+  // test_parse_array();
 
 
   // naive unit test
@@ -213,6 +233,7 @@ static void test_parse() {
   test_access_boolean();
   test_access_number();
   test_access_string();
+  test_access_array();
 }
 
 int main() {
