@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-12-01 13:38:58
+ * @LastEditTime: 2020-12-02 16:56:18
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -151,19 +151,45 @@ static void test_parse_string() {
     TEST_STRING("Hello", "\"Hello\"");
     TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
     TEST_STRING("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+    // \uXXXX test
+    TEST_STRING("Hello\0World", "\"Hello\\u0000World\"");
+    TEST_STRING("\x24", "\"\\u0024\"");
+    TEST_STRING("\xC2\xA2", "\"\\u00A2\""); 
+    TEST_STRING("\xE2\x82\xAC", "\"\\u20AC\"");
+    TEST_STRING("\xF0\x9D\x84\x9E", "\"\\uD834\\uDD1E\"");
+    TEST_STRING("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");
 }
 
 static void test_parse_invalid_string_escape() {
-  TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\g\"");
   TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\'\"");
   TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\0\"");
   TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\x12\"");
 }
 
 static void test_parse_invalid_string_char() {
-    TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
-    TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x1F\"");
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
+  TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x1F\"");
 }
+
+static void test_parse_missing_quotation_mark() {
+  TEST_ERROR(JSON_PARSE_MISS_QUOTATION_MARK, "\"fd");
+}
+
+static void test_parse_invalid_unicode_hex() {
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u91gg\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u02\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u0/02\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u0  2\"");
+}
+
+static void test_parse_invalid_unicode_surrogate() {
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD800\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uDBFF\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD800\\\\\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD811\\u0032\"");
+}
+
 // 𝄞
 static void test_parse() {
   test_parse_expect_value();
@@ -177,6 +203,9 @@ static void test_parse() {
   test_parse_string();
   test_parse_invalid_string_escape();
   test_parse_invalid_string_char();
+  test_parse_missing_quotation_mark();
+  test_parse_invalid_unicode_hex();
+  test_parse_invalid_unicode_surrogate();
 
 
   // naive unit test

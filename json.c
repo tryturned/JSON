@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-02 15:47:22
+ * @LastEditTime: 2020-12-02 16:56:03
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -85,7 +85,7 @@ static void* json_context_pop(json_context* c, size_t size) {
 
 const char* json_parse_hex4(const char* p, unsigned* u) {
   unsigned ret = 0;
-  for (int _ = 0; _ < 4 && p != '\0'; _++, p++) {
+  for (int _ = 0; _ < 4; _++, p++) {
     ret <<= 4;
     if (ISDIGIT(*p)) {
       ret |= (*p - '0');
@@ -97,6 +97,27 @@ const char* json_parse_hex4(const char* p, unsigned* u) {
   }
   *u = ret;
   return p;
+}
+
+static void json_encode_utf8(json_context* c,unsigned u) {
+  if (u <= 0x7F) 
+      PUTC(c, u & 0xFF);
+  else if (u <= 0x7FF) {
+      PUTC(c, 0xC0 | ((u >> 6) & 0xFF));
+      PUTC(c, 0x80 | ( u       & 0x3F));
+  }
+  else if (u <= 0xFFFF) {
+      PUTC(c, 0xE0 | ((u >> 12) & 0xFF));
+      PUTC(c, 0x80 | ((u >>  6) & 0x3F));
+      PUTC(c, 0x80 | ( u        & 0x3F));
+  }
+  else {
+      assert(u <= 0x10FFFF);
+      PUTC(c, 0xF0 | ((u >> 18) & 0xFF));
+      PUTC(c, 0x80 | ((u >> 12) & 0x3F));
+      PUTC(c, 0x80 | ((u >>  6) & 0x3F));
+      PUTC(c, 0x80 | ( u        & 0x3F));
+  }
 }
 
 static json_parse_type json_parse_string(json_context* c, json_value* v) {
@@ -113,7 +134,7 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
           c->json = p;
           return JSON_PARSE_OK;
         case '\0':
-          STRING_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK);
+          STRING_ERROR(JSON_PARSE_MISS_QUOTATION_MARK);
         case '\\':
           switch (*p++) {
             case '\"': PUTC(c, '\"'); break;
@@ -124,11 +145,21 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
             case 'n':  PUTC(c, '\n'); break;
             case 'r':  PUTC(c, '\r'); break;
             case 't':  PUTC(c, '\t'); break;
-            case 'u':
-              unsigned u;
+            case 'u': ;
+              unsigned u, u2;
               if (!(p = json_parse_hex4(p, &u)))
                 STRING_ERROR(JSON_PARSE_INVALID_UNICODE_HEX);
-              // if (u >= )
+              if (u >= 0xD800 && u <= 0xDBFF) {
+                if (*p++ != '\\')
+                  STRING_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE);
+                if (*p++ != 'u')
+                  STRING_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE);
+                if (!(p = json_parse_hex4(p, &u2)))
+                  STRING_ERROR(JSON_PARSE_INVALID_UNICODE_HEX);
+                if (u2 < 0xDC00 || u2 > 0xDFFF)
+                  STRING_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE);
+                u = (((u - 0xD800) << 10) | (u2 - 0xDC00)) + 0x10000;
+              }
               json_encode_utf8(c, u);
               break;
           

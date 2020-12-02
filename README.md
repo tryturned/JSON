@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-01 12:54:21
+ * @LastEditTime: 2020-12-02 16:56:24
 -->
 # JSON 库
 写出一个支持跨平台使用的 C JSON 库, 并经过了详细的单元测试。  
@@ -68,11 +68,20 @@
   TEST_STRING("", "\"\"");
   TEST_STRING("Hello\nWorld", "\"Hello\\nWorld\"");
   TEST_STRING("\" \\ / \b \f \n \r \t", "\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
+  // Unicode --> utf-8
+  TEST_STRING("\xE2\x82\xAC", "\"\\u20AC\""); 
   // test_parse_invalid_string_escape
   TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\g\"");
   TEST_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE, "\"\\x12\"");
   // test_parse_invalid_string_char
   TEST_ERROR(JSON_PARSE_INVALID_STRING_CHAR, "\"\x01\"");
+  // test_parse_missing_quotation_mark
+  TEST_ERROR(JSON_PARSE_MISS_QUOTATION_MARK, "\"fd");
+  // test_parse_invalid_unicode_hex
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_HEX, "\"ab\\u\"");
+  // test_parse_invalid_unicode_surrogate
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD800\"");
+  TEST_ERROR(JSON_PARSE_INVALID_UNICODE_SURROGATE, "\"\\uD811\\u0032\"");
 ```
 ### `array`
 ```c
