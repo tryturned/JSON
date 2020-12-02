@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:42:22
- * @LastEditTime: 2020-11-30 19:32:38
+ * @LastEditTime: 2020-12-02 12:26:47
  */
 #ifndef JSON_JSON_H__
 #define JSON_JSON_H__
@@ -36,6 +36,7 @@ void json_set_boolean(json_value* v, int b);
 double json_get_number(const json_value* v);
 void json_set_number(json_value* v, double n);
 
+#define PUTC(c, ch) do { *(char*)json_context_push(c, sizeof(char)) = (ch); } while(0)
 void json_set_string(json_value* v, const char* s, size_t len);
 const char* json_get_string(const json_value* v);
 size_t json_get_string_length(const json_value* v);

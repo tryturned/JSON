@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-11-30 21:29:32
+ * @LastEditTime: 2020-12-02 12:30:27
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -87,7 +87,7 @@ static void* json_context_pop(json_context* c, size_t size) {
   return c->stack + (c->top -= size);
 }
 
-#define PUTC(c, ch) do { *(char*)json_context_push(c, sizeof(char)) = (ch); } while(0)
+#define STRING_ERROR(ret) do { c->top = head; return ret; } while(0)
 
 static json_parse_type json_parse_string(json_context* c, json_value* v) {
   EXPECT(c, '\"');
@@ -103,8 +103,7 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
           c->json = p;
           return JSON_PARSE_OK;
         case '\0':
-          c->top = head;
-          return LEPT_PARSE_MISS_QUOTATION_MARK;
+          STRING_ERROR(LEPT_PARSE_MISS_QUOTATION_MARK);
         case '\\':
           switch (*p++) {
             case '\"': PUTC(c, '\"'); break;
@@ -115,16 +114,20 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
             case 'n':  PUTC(c, '\n'); break;
             case 'r':  PUTC(c, '\r'); break;
             case 't':  PUTC(c, '\t'); break;
+            case 'u':
+              unsigned u;
+              if (!(p = json_parse_hex4(p, &u)))
+                STRING_ERROR(JSON_PARSE_INVALID_UNICODE_HEX);
+              json_encode_utf8(c, u);
+              break;
           
             default:
-              c->top = head;
-              return JSON_PARSE_INVALID_STRING_ESCAPE;
+            STRING_ERROR(JSON_PARSE_INVALID_STRING_ESCAPE);
           }
           break;
         default:
           if ((unsigned char)ch < 0x20) {
-            c->top = head;
-            return JSON_PARSE_INVALID_STRING_CHAR;
+            STRING_ERROR(JSON_PARSE_INVALID_STRING_CHAR);
           }
           PUTC(c, ch);
       }
