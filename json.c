@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-03 16:32:07
+ * @LastEditTime: 2020-12-03 18:26:47
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -34,8 +34,8 @@ static json_parse_type json_parse_number(json_context* c, json_value* v) {
   if (*p == '-') p++;
   if (*p == '0') {
     p++;
-    if (*p && *p != '.') 
-      return JSON_PARSE_ROOT_NOT_SINGULAR;
+    // if (*p && *p != '.') 
+    //   return JSON_PARSE_ROOT_NOT_SINGULAR;
   } else {
       if (!ISDIGIT1TO9(*p)) return JSON_PARSE_INVALID_VALUE;
       for (p++; ISDIGIT(*p); p++);
@@ -193,11 +193,14 @@ static json_parse_type json_parse_array(json_context* c, json_value* v) {
     json_value e;
     json_init(&e);
     if ((ret = json_parse_value(c, &e)) != JSON_PARSE_OK)
-      return ret;
+      break;
     memcpy(json_context_push(c, sizeof(json_value)), &e, sizeof(json_value));
     size++;
-    if (*c->json == ',')
+    json_parse_whitespace(c);
+    if (*c->json == ',') {
       c->json++;
+      json_parse_whitespace(c);
+    }
     else if (*c->json == ']') {
       c->json++;
       v->type = JSON_ARRAY;
@@ -206,10 +209,11 @@ static json_parse_type json_parse_array(json_context* c, json_value* v) {
       memcpy(v->e = (json_value*)malloc(size), json_context_pop(c, size), size);
       return JSON_PARSE_OK;
     } else {
-      return JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+      ret = JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+      break;
     }
   }
-  for (size_t _ = 0; _ < v->size; _++) {
+  for (size_t _ = 0; _ < size; _++) {
     json_free((json_value*)json_context_pop(c, sizeof(json_value)));
   }
   return ret;
@@ -225,6 +229,7 @@ static json_parse_type json_parse_value(json_context* c, json_value* v) {
     default:   return json_parse_number(c, v);
     case '\0': return JSON_PARSE_EXPECT_VALUE;
   }
+  return JSON_PARSE_INVALID_VALUE;
 }
 
 json_parse_type json_parse(json_value* v, const char* json) {
@@ -325,6 +330,8 @@ json_value* json_get_array_element(const json_value* v, size_t index) {
 
 void json_set_array(json_value* v, json_value* array) {
   json_free(v);
-  v->e = array;
+  v->e = (json_value*)malloc(sizeof(json_value));
+  v->size = 1;
+  memcpy(v->e, array, sizeof(json_value));
   v->type = JSON_ARRAY;
 }

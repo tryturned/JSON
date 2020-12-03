@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-12-03 16:39:46
+ * @LastEditTime: 2020-12-03 18:46:47
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -86,7 +86,7 @@ static void test_parse_invalid_value() {
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "nul");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "?");
 
-  /* invalid number */
+  // invalid number 
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "+0");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "+1");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, ".123"); /* at least one digit before '.' */
@@ -95,6 +95,10 @@ static void test_parse_invalid_value() {
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "inf");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "NAN");
   TEST_ERROR(JSON_PARSE_INVALID_VALUE, "nan");
+
+  // invalid array
+  TEST_ERROR(JSON_PARSE_INVALID_VALUE, "[1,]");
+  TEST_ERROR(JSON_PARSE_INVALID_VALUE, "[0, nul]");
 }
 
 static void test_parse_root_not_singular() {
@@ -197,6 +201,19 @@ static void test_parse_array() {
     EXPECT_EQ_INT(JSON_ARRAY, json_get_type(&v));
     EXPECT_EQ_SIZE_T(0, json_get_array_size(&v));
     json_free(&v);
+    json_init(&v);
+    EXPECT_EQ_INT(JSON_PARSE_OK, json_parse(&v, "[ null , false , true , 123 , \"abc\" ]"));
+    EXPECT_EQ_INT(JSON_NULL,   json_get_type(json_get_array_element(&v, 0)));
+    EXPECT_EQ_INT(JSON_FALSE,  json_get_type(json_get_array_element(&v, 1)));
+    EXPECT_EQ_INT(JSON_TRUE,   json_get_type(json_get_array_element(&v, 2)));
+    EXPECT_EQ_INT(JSON_NUMBER, json_get_type(json_get_array_element(&v, 3)));
+    EXPECT_EQ_INT(JSON_STRING, json_get_type(json_get_array_element(&v, 4)));
+    EXPECT_EQ_DOUBLE(123.0, json_get_number(json_get_array_element(&v, 3)));
+    EXPECT_EQ_STRING("abc", json_get_string(json_get_array_element(&v, 4)), json_get_string_length(json_get_array_element(&v, 4)));
+    json_free(&v);
+    json_init(&v);
+    EXPECT_EQ_INT(JSON_PARSE_OK, json_parse(&v, "[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ]]"));
+    json_free(&v);
 }
 static void test_access_array() {
   json_value v, v2;
@@ -205,8 +222,15 @@ static void test_access_array() {
   json_set_string(&v, "a", 1);
   json_set_array(&v2, &v);
   EXPECT_EQ_INT(JSON_ARRAY, json_get_type(&v2));
-  json_free(&v);
   json_free(&v2);
+}
+
+static void test_parse_miss_comma_or_square_bracket() {
+    TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[1");
+    TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[1}");
+    TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[1 2");
+    TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[[]");
+    TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[1, 2 4]");
 }
 
 // 𝄞
@@ -226,6 +250,7 @@ static void test_parse() {
   test_parse_invalid_unicode_hex();
   test_parse_invalid_unicode_surrogate();
   test_parse_array();
+  test_parse_miss_comma_or_square_bracket();
 
 
   // naive unit test
@@ -241,7 +266,6 @@ int main() {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
   #endif
   test_parse();
-  printf("ds");
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
   return main_ret;
 }

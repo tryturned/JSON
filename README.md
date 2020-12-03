@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-03 15:22:42
+ * @LastEditTime: 2020-12-03 18:30:21
 -->
 # JSON 库
 
@@ -86,7 +86,11 @@
 ```
 ### `array`
 ```c
-// TODO
+  // invalid array
+  TEST_ERROR(JSON_PARSE_INVALID_VALUE, "[1,]");
+  // test_parse_miss_comma_or_square_bracket
+  TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[[]");
+  TEST_ERROR(JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET, "[1 2]");
 ```
 ### `object`
 ```c
