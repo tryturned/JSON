@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-03 18:26:47
+ * @LastEditTime: 2020-12-03 19:53:06
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -120,17 +120,17 @@ static void json_encode_utf8(json_context* c,unsigned u) {
   }
 }
 
-static json_parse_type json_parse_string(json_context* c, json_value* v) {
+static json_parse_type json_parse_string_raw(json_context* c, char** s, size_t* len) {
   EXPECT(c, '\"');
-  size_t head = c->top, len;
+  size_t head = c->top;
   const char* p;
   p = c->json;
   while (True) {
       char ch = *p++;
       switch (ch) {
         case '\"':
-          len = c->top - head;
-          json_set_string(v, (const char*)json_context_pop(c, len), len);
+          *len = c->top - head;
+          *s = (char*)json_context_pop(c, *len);
           c->json = p;
           return JSON_PARSE_OK;
         case '\0':
@@ -174,6 +174,15 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
           PUTC(c, ch);
       }
   }  
+}
+
+static json_parse_type json_parse_string(json_context* c, json_value* v) {
+  int ret;
+  char* s;
+  size_t len;
+  if ((ret = json_parse_string_raw(c, &s, &len)) == JSON_PARSE_OK)
+    json_set_string(v, s, len);
+  return ret;
 }
 
 static json_parse_type json_parse_value(json_context* c, json_value* v);
@@ -334,4 +343,24 @@ void json_set_array(json_value* v, json_value* array) {
   v->size = 1;
   memcpy(v->e, array, sizeof(json_value));
   v->type = JSON_ARRAY;
+}
+// ...... json objects ......
+size_t json_get_object_size(const json_value* v) {
+  assert(v != NULL && v->type == JSON_OBJECT);
+  return v->o_size;
+}
+const char* json_get_object_key(const json_value* v, size_t index) {
+  assert(v != NULL && v->type == JSON_OBJECT);
+  assert(v->o_size > index);
+  return v->m[index].key;
+}
+size_t json_get_object_key_length(const json_value* v, size_t index) {
+  assert(v != NULL && v->type == JSON_OBJECT);
+  assert(v->o_size > index);
+  return v->m[index].klen;
+}
+json_value* json_get_object_value(const json_value* v, size_t index) {
+  assert(v != NULL && v->type == JSON_OBJECT);
+  assert(v->o_size > index);
+  return &v->m[index].value;
 }

@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:42:22
- * @LastEditTime: 2020-12-03 16:05:21
+ * @LastEditTime: 2020-12-03 19:14:35
  */
 #ifndef JSON_JSON_H__
 #define JSON_JSON_H__
@@ -51,4 +51,9 @@ size_t json_get_string_length(const json_value* v);
 size_t json_get_array_size(const json_value* v);
 json_value* json_get_array_element(const json_value* v, size_t index);
 void json_set_array(json_value* v, json_value* array);
+
+size_t json_get_object_size(const json_value* v);
+const char* json_get_object_key(const json_value* v, size_t index);
+size_t json_get_object_key_length(const json_value* v, size_t index);
+json_value* json_get_object_value(const json_value* v, size_t index);
 #endif

@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-12-03 16:21:25
+ * @LastEditTime: 2020-12-03 19:44:24
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
@@ -20,6 +20,8 @@ typedef enum {
 } json_type;
 
 typedef struct json_value json_value;
+typedef struct json_member json_member;
+
 // JSON 树的节点
 struct json_value {
   union {
@@ -30,13 +32,24 @@ struct json_value {
       char* s;
       size_t len;
     };
-    // 仅当 json_type==JSON_ARRAY 时 s,len 有效
+    // 仅当 json_type==JSON_ARRAY 时 e,size 有效
     struct {
       json_value* e;
       size_t size;
     };
+    // 仅当 json_type==JSON_OBJECT 时 key,value,klen 有效
+    struct {
+      json_member* m;
+      size_t o_size;
+    };
   };
   json_type type;
+};
+
+struct json_member {
+  char* key;
+  size_t klen;
+  json_value value;
 };
 
 // json_parse 状态返回类型
