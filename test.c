@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:29:38
- * @LastEditTime: 2020-12-02 23:27:20
+ * @LastEditTime: 2020-12-03 16:39:46
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -225,7 +225,7 @@ static void test_parse() {
   test_parse_missing_quotation_mark();
   test_parse_invalid_unicode_hex();
   test_parse_invalid_unicode_surrogate();
-  // test_parse_array();
+  test_parse_array();
 
 
   // naive unit test
@@ -241,6 +241,7 @@ int main() {
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
   #endif
   test_parse();
+  printf("ds");
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count, test_pass * 100.0 / test_count);
   return main_ret;
 }

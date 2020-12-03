@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-02 23:22:04
+ * @LastEditTime: 2020-12-03 16:32:07
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -176,12 +176,52 @@ static json_parse_type json_parse_string(json_context* c, json_value* v) {
   }  
 }
 
+static json_parse_type json_parse_value(json_context* c, json_value* v);
+static json_parse_type json_parse_array(json_context* c, json_value* v) {
+  EXPECT(c, '[');
+  size_t size = 0;
+  json_parse_type ret;
+  json_parse_whitespace(c);
+  if (*c->json == ']') {
+    c->json++;
+    v->type = JSON_ARRAY;
+    v->size = 0;
+    v->e = NULL;
+    return JSON_PARSE_OK;
+  }
+  while (True) {
+    json_value e;
+    json_init(&e);
+    if ((ret = json_parse_value(c, &e)) != JSON_PARSE_OK)
+      return ret;
+    memcpy(json_context_push(c, sizeof(json_value)), &e, sizeof(json_value));
+    size++;
+    if (*c->json == ',')
+      c->json++;
+    else if (*c->json == ']') {
+      c->json++;
+      v->type = JSON_ARRAY;
+      v->size = size;
+      size *= sizeof(json_value);
+      memcpy(v->e = (json_value*)malloc(size), json_context_pop(c, size), size);
+      return JSON_PARSE_OK;
+    } else {
+      return JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+    }
+  }
+  for (size_t _ = 0; _ < v->size; _++) {
+    json_free((json_value*)json_context_pop(c, sizeof(json_value)));
+  }
+  return ret;
+}
+
 static json_parse_type json_parse_value(json_context* c, json_value* v) {
   switch (*c->json) {
     case 'n':  return json_parse_literal(c, v, "null", JSON_NULL);
     case 't':  return json_parse_literal(c, v, "true", JSON_TRUE);
     case 'f':  return json_parse_literal(c, v, "false", JSON_FALSE);
     case '"':  return json_parse_string(c, v);
+    case '[':  return json_parse_array(c, v);
     default:   return json_parse_number(c, v);
     case '\0': return JSON_PARSE_EXPECT_VALUE;
   }
@@ -236,8 +276,19 @@ void json_set_boolean(json_value* v, int b) {
 
 void json_free(json_value* v) {
   assert(v != NULL);
-  if (v->type == JSON_STRING)
-    free(v->s);
+  size_t index;
+  switch (v->type) {
+    case JSON_STRING:
+      free(v->s);
+      break;
+    case JSON_ARRAY:
+      for (index = 0; index < v->size; index++) {
+        json_free(&v->e[index]);
+      }
+      free(v->e);
+      break;
+    default: break;
+  }
   v->type = JSON_NULL;
 }
 

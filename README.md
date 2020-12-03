@@ -1,11 +1,9 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-02 23:28:51
+ * @LastEditTime: 2020-12-03 15:22:42
 -->
 # JSON 库
-[从零开始的 JSON 库教程（五）：解析数组](https://github.com/miloyip/json-tutorial/blob/master/tutorial05/tutorial05.md#1-json-%E6%95%B0%E7%BB%84)   
-
 
 写出一个支持跨平台使用的 C JSON 库, 并经过了详细的单元测试。  
 * [JSON 库基础](#JSON-库基础)  
@@ -96,12 +94,12 @@
 ```
 
 ## JSON 库特点
+- 使用标准 C 语言, 以实现跨平台 JSON 库
 - 符合标准的 JSON 解析器和生成器
 - 手写的递归下降解析器（recursive descent parser）
-- 使用标准 C 语言
-- 跨平台／编译器（如 Windows／Linux／OS X，vc／gcc／clang）
 - 仅支持 UTF-8 JSON 文本
 - 仅支持以 double 存储 JSON number 类型
+- 使用以字节为基本单位的动态堆栈作为缓冲区管理内存
 ## JSON 库技能
 - 测试驱动开发（test driven development, TDD）
 - C 语言编程风格
