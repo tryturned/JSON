@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-12-03 19:44:24
+ * @LastEditTime: 2020-12-03 23:00:56
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
@@ -73,7 +73,14 @@ typedef enum {
   JSON_PARSE_INVALID_UNICODE_HEX,
   // Unicode surrogate pair error
   JSON_PARSE_INVALID_UNICODE_SURROGATE,
-  JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET
+  // Array miss comma or bracket
+  JSON_PARSE_MISS_COMMA_OR_SQUARE_BRACKET,
+  // OBJECT miss key
+  JSON_PARSE_MISS_KEY,
+  // OBJECT miss colon
+  JSON_PARSE_MISS_COLON,
+  // OBJECT miss comma or bracket
+  JSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET
 } json_parse_type;
 
 typedef struct {

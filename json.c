@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-03 19:53:06
+ * @LastEditTime: 2020-12-03 23:14:18
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -228,6 +228,76 @@ static json_parse_type json_parse_array(json_context* c, json_value* v) {
   return ret;
 }
 
+static json_parse_type json_parse_object(json_context* c, json_value* v) {
+  size_t i, size;
+  json_member m;
+  json_parse_type ret;
+  EXPECT(c, '{');
+  json_parse_whitespace(c);
+  if (*c->json == '}') {
+    c->json++;
+    v->type = JSON_OBJECT;
+    v->m = NULL;
+    v->o_size = 0;
+    return JSON_PARSE_OK;
+  }
+  m.key = NULL;
+  size = 0;
+  while (True) {
+    char* str;
+    json_init(&m.value);
+    // parse key
+    if (*c->json != '"') {
+      ret = JSON_PARSE_MISS_KEY;
+      break;
+    }
+    if ((ret = json_parse_string_raw(c, &str, &m.klen)) != JSON_PARSE_OK)
+      break;
+    memcpy(m.key = (char*)malloc(m.klen + 1), str, m.klen);
+    m.key[m.klen] = '\0';
+    // parse ws colon ws
+    json_parse_whitespace(c);
+    if (*c->json != ':') {
+      ret = JSON_PARSE_MISS_COLON;
+      break;
+    }
+    c->json++;
+    json_parse_whitespace(c);
+    // parse value
+    if ((ret = json_parse_value(c, &m.value)) != JSON_PARSE_OK)
+      break;
+    memcpy(json_context_push(c, sizeof(json_member)), &m, sizeof(json_member));
+    size++;
+    // ownership is transferred to member on stack
+    m.key = NULL;
+    /* parse ws [comma | right-curly-brace] ws */
+    json_parse_whitespace(c);
+    if (*c->json == ',') {
+      c->json++;
+      json_parse_whitespace(c);
+    } else if (*c->json == '}') {
+      size_t s = sizeof(json_member) * size;
+      c->json++;
+      v->type = JSON_OBJECT;
+      v->o_size = size;
+      memcpy(v->m = (json_member*)malloc(s), json_context_pop(c, s), s);
+      return JSON_PARSE_OK;
+    } else {
+      ret = JSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET;
+      break;
+    }
+  }
+  // Pop and free members on the stack
+  free(m.key);
+  for (i = 0; i < size; i++) {
+    json_member* m = (json_member*)json_context_pop(c, sizeof(json_member));
+    free(m->key);
+    json_free(&m->value);
+  }
+  v->type = JSON_NULL;
+  return ret;
+}
+
 static json_parse_type json_parse_value(json_context* c, json_value* v) {
   switch (*c->json) {
     case 'n':  return json_parse_literal(c, v, "null", JSON_NULL);
@@ -235,6 +305,7 @@ static json_parse_type json_parse_value(json_context* c, json_value* v) {
     case 'f':  return json_parse_literal(c, v, "false", JSON_FALSE);
     case '"':  return json_parse_string(c, v);
     case '[':  return json_parse_array(c, v);
+    case '{':  return json_parse_object(c, v);
     default:   return json_parse_number(c, v);
     case '\0': return JSON_PARSE_EXPECT_VALUE;
   }
