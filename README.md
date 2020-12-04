@@ -1,9 +1,10 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-04 14:00:36
+ * @LastEditTime: 2020-12-04 14:43:47
 -->
 # JSON 库
+[![Build Status](https://travis-ci.com/tryturned/JSON.svg?branch=master)](https://travis-ci.com/tryturned/JSON)  
 
 写出一个支持跨平台使用的 C JSON 库, 并经过了详细的单元测试。  
 * [JSON 库基础](#JSON-库基础)  
