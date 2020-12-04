@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-04 13:09:27
+ * @LastEditTime: 2020-12-04 13:43:12
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -372,6 +372,13 @@ void json_free(json_value* v) {
       }
       free(v->e);
       break;
+    case JSON_OBJECT:
+      for (index = 0; index < v->o_size; index++) {
+        free(v->m[index].key);
+        json_free(&v->m[index].value);
+      }
+      free(v->m);
+      break;
     default: break;
   }
   v->type = JSON_NULL;
@@ -435,6 +442,16 @@ json_value* json_get_object_value(const json_value* v, size_t index) {
   assert(v->o_size > index);
   return &v->m[index].value;
 }
+
+size_t json_find_object_index(const json_value* v, const char* key, size_t klen) {
+  size_t i;
+  assert(v != NULL && v->type == JSON_OBJECT && key != NULL);
+  for (i = 0; i < v->o_size; i++)
+    if (v->m[i].klen == klen && memcmp(v->m[i].key, key, klen) == 0)
+      return i;
+  return JSON_KEY_NOT_EXIST;
+}
+
 // stringify
 static void json_stringify_string(json_context* c, const char* s, size_t len) {
   size_t i;
@@ -520,3 +537,4 @@ int json_stringify(const json_value* v, char** json, size_t* length) {
   *json = c.stack;
   return JSON_STRINGIFY_OK;
 }
+

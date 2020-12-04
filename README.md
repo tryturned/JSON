@@ -1,7 +1,7 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-04 13:24:38
+ * @LastEditTime: 2020-12-04 14:00:36
 -->
 # JSON 库
 
@@ -27,8 +27,29 @@
 - 可以将基础数据结构转换成 JSON 文本（stringify）
 - 提供接口访问 JSON 文本解析后的数据结构（access）
 ## JSON 库使用
-
-
+以 `object interface` 为例展示如何使用 `C JSON` 库:  
+```c
+  size_t json_find_object_index(const json_value* v, const char* key, size_t klen);
+  json_value* json_get_object_value(const json_value* v, size_t index);
+```
+例如： 
+```c
+#include "json.h"
+int main() {
+  int ret;
+  json_value o;
+  size_t index;
+  json_init(&o);
+  json_parse(&o, "{\"nums\":[12, 13, 14, 15, 16, 17], \"target\":15}");
+  index = json_find_object_index(&o, "nums", 4);
+  if (index != JSON_KEY_NOT_EXIST) {
+    json_value* v = json_get_object_value(&o, index);
+    printf("%g\n", (json_get_array_element(v, 3))->n);
+  }
+  json_free(&o);
+  return ret;
+}
+```
 ## JSON 库测试
 ### `处理异常情况`
 ```c
