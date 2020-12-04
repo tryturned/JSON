@@ -18,6 +18,7 @@ script:
   - mkdir build
   - cd build
   - cmake ../
+  - make
   - ./json_test
 
 notifications:
