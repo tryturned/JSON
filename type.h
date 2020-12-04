@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 14:59:10
- * @LastEditTime: 2020-12-03 23:00:56
+ * @LastEditTime: 2020-12-04 13:09:12
  */
 #ifndef JSON_TYPE_H__
 #define JSON_TYPE_H__
@@ -80,7 +80,11 @@ typedef enum {
   // OBJECT miss colon
   JSON_PARSE_MISS_COLON,
   // OBJECT miss comma or bracket
-  JSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET
+  JSON_PARSE_MISS_COMMA_OR_CURLY_BRACKET,
+  // 序列化 json_value 为 json 串
+  JSON_STRINGIFY_OK,
+  // 无效值
+  JSON_STRINGIFY_INVALID_VALUE
 } json_parse_type;
 
 typedef struct {

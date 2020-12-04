@@ -1,14 +1,14 @@
 <!--
  * @Author: taobo
  * @Date: 2020-11-29 14:23:33
- * @LastEditTime: 2020-12-03 23:31:54
+ * @LastEditTime: 2020-12-04 13:24:38
 -->
 # JSON 库
-[从零开始的 JSON 库教程（七）：生成器](https://github.com/miloyip/json-tutorial/blob/master/tutorial07/tutorial07.md#1-json-%E7%94%9F%E6%88%90%E5%99%A8)  
 
 写出一个支持跨平台使用的 C JSON 库, 并经过了详细的单元测试。  
 * [JSON 库基础](#JSON-库基础)  
 * [JSON 库需求](#JSON-库需求)
+* [JSON 库使用](#JSON-库使用)
 * [JSON 库测试](#JSON-库测试)
   * [处理异常情况](#处理异常情况)
   * [null](#null)
@@ -26,6 +26,9 @@
 - 可以将 JSON 文本解析为一个树状数据结构（parse）
 - 可以将基础数据结构转换成 JSON 文本（stringify）
 - 提供接口访问 JSON 文本解析后的数据结构（access）
+## JSON 库使用
+
+
 ## JSON 库测试
 ### `处理异常情况`
 ```c

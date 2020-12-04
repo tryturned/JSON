@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-29 15:52:19
- * @LastEditTime: 2020-12-03 23:14:18
+ * @LastEditTime: 2020-12-04 13:09:27
  */
 #ifdef _WINDOWS
 #define _CRTDBG_MAP_ALLOC
@@ -434,4 +434,89 @@ json_value* json_get_object_value(const json_value* v, size_t index) {
   assert(v != NULL && v->type == JSON_OBJECT);
   assert(v->o_size > index);
   return &v->m[index].value;
+}
+// stringify
+static void json_stringify_string(json_context* c, const char* s, size_t len) {
+  size_t i;
+  assert(s != NULL);
+  PUTC(c, '"');
+  for (i = 0; i < len; i++) {
+    unsigned char ch = (unsigned char)s[i];
+    switch (ch) {
+      case '\"': PUTS(c, "\\\"", 2); break;
+      case '\\': PUTS(c, "\\\\", 2); break;
+      case '\b': PUTS(c, "\\b",  2); break;
+      case '\f': PUTS(c, "\\f",  2); break;
+      case '\n': PUTS(c, "\\n",  2); break;
+      case '\r': PUTS(c, "\\r",  2); break;
+      case '\t': PUTS(c, "\\t",  2); break;
+      default:
+        if (ch < 0x20) {
+          char buffer[7];
+          sprintf(buffer, "\\u%04X", ch);
+          PUTS(c, buffer, 6);
+        }
+        else
+          PUTC(c, s[i]);
+    }
+  }
+  PUTC(c, '"');
+}
+
+static int json_stringify_value(json_context* c, const json_value* v) {
+  size_t i;
+  int ret;
+  switch (v->type) {
+    case JSON_NULL:   PUTS(c, "null",  4); break;
+    case JSON_FALSE:  PUTS(c, "false", 5); break;
+    case JSON_TRUE:   PUTS(c, "true",  4); break;
+    case JSON_NUMBER: ;
+      char* buffer = json_context_push(c, 32);
+      int length = sprintf(buffer, "%.17g", v->n);
+      c->top -= 32 - length;
+      break;
+    case JSON_STRING: json_stringify_string(c, v->s, v->len); break;
+    case JSON_ARRAY:
+      PUTC(c, '[');
+      for (i = 0; i < v->size; i++) {
+        if (i > 0)
+          PUTC(c, ',');
+        if ((ret = json_stringify_value(c, &v->e[i])) != JSON_STRINGIFY_OK)
+          return JSON_STRINGIFY_INVALID_VALUE;
+      }
+      PUTC(c, ']');
+      break;
+    case JSON_OBJECT:
+      PUTC(c, '{');
+      for (i = 0; i < v->o_size; i++) {
+        if (i > 0)
+          PUTC(c, ',');
+        json_stringify_string(c, v->m[i].key, v->m[i].klen);
+        PUTC(c, ':');
+        json_stringify_value(c, &v->m[i].value);
+      }
+      PUTC(c, '}');
+      break;
+    default: return JSON_STRINGIFY_INVALID_VALUE;
+  }
+  return JSON_STRINGIFY_OK;
+}
+
+int json_stringify(const json_value* v, char** json, size_t* length) {
+  assert(v != NULL);
+  assert(json != NULL);
+  json_context c;
+  int ret;
+  c.stack = (char*)malloc(c.size = JSON_PARSE_STRINGIFY_INIT_SIZE);
+  c.top = 0;
+  if ((ret = json_stringify_value(&c, v)) != JSON_STRINGIFY_OK) {
+    free(c.stack);
+    *json = NULL;
+    return ret;
+  }
+  if (length)
+    *length = c.top;
+  PUTC(&c, '\0');
+  *json = c.stack;
+  return JSON_STRINGIFY_OK;
 }

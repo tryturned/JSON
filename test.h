@@ -1,7 +1,7 @@
 /*
  * @Author: taobo
  * @Date: 2020-11-30 14:32:29
- * @LastEditTime: 2020-12-02 23:08:34
+ * @LastEditTime: 2020-12-04 12:41:31
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,10 +13,10 @@
     do {\
         test_count++;\
         if (equality)\
-          test_pass++;\
+            test_pass++;\
         else {\
-          fprintf(stderr, "%d lines: expect: " format " actual: " format "\n", __LINE__, expect, actual);\
-          main_ret = 1;\
+            fprintf(stderr, "%d lines: expect: " format " actual: " format "\n", __LINE__, expect, actual);\
+            main_ret = 1;\
         }\
     } while (0)
 
@@ -39,12 +39,12 @@
     
 #define TEST_ERROR(error, json)\
     do {\
-      json_value v;\
-      json_init(&v);\
-      json_set_boolean(&v, 0);\
-      EXPECT_EQ_INT(error, json_parse(&v, json));\
-      EXPECT_EQ_INT(JSON_NULL, json_get_type(&v));\
-      json_free(&v);\
+        json_value v;\
+        json_init(&v);\
+        json_set_boolean(&v, 0);\
+        EXPECT_EQ_INT(error, json_parse(&v, json));\
+        EXPECT_EQ_INT(JSON_NULL, json_get_type(&v));\
+        json_free(&v);\
     } while (0)
 
 #define TEST_STRING(expect, json)\
@@ -57,4 +57,17 @@
         json_free(&v);\
     } while(0)
     
-#define EXPECT_EQ_SIZE_T(expect, actual) EXPECT_EQ_BASE((expect) == (actual), (size_t)expect, (size_t)actual, "%zu")
+#define EXPECT_EQ_SIZE_T(expect, actual) EXPECT_EQ_BASE((expect) == (actual), (size_t)expect, (size_t)actual, "%zu") 
+
+#define TEST_ROUNDTRIP(json)\
+    do {\
+        json_value v;\
+        char* json2;\
+        size_t length;\
+        json_init(&v);\
+        EXPECT_EQ_INT(JSON_PARSE_OK, json_parse(&v, json));\
+        EXPECT_EQ_INT(JSON_STRINGIFY_OK, json_stringify(&v, &json2, &length));\
+        EXPECT_EQ_STRING(json, json2, length);\
+        json_free(&v);\
+        free(json2);\
+    } while(0)
